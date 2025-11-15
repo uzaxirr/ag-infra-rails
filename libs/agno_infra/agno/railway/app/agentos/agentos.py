@@ -83,12 +83,11 @@ class RailwayAgentOS(RailwayApp):
         if self.enable_cors:
             container_env["ENABLE_CORS"] = "true"
 
-        # Ensure DATABASE_URL is present (required for AgentOS)
+        # Add DATABASE_URL if database is referenced
         if "DATABASE_URL" not in container_env:
-            # If no database reference was provided, warn the user
-            # AgentOS requires a database connection
-            container_env[
-                "DATABASE_URL"
-            ] = "postgresql://postgres:postgres@localhost:5432/railway"  # Default placeholder
-
+            if self.database:
+                # Use database reference to construct proper Railway variable template
+                # This is a fallback - normally DATABASE_URL is set in parent get_container_env()
+                database_url_ref = self.database.get_connection_string_reference()
+                container_env["DATABASE_URL"] = database_url_ref
         return container_env

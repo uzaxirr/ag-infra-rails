@@ -280,12 +280,22 @@ class RailwayPostgres(RailwayResource):
     def get_connection_string_reference(self) -> str:
         """Get Railway variable reference for DATABASE_URL.
 
-        Returns a Railway variable reference that can be used in other services:
-        Example: "${{Postgres.DATABASE_URL}}"
+        Constructs DATABASE_URL from individual PostgreSQL variables that Railway provides.
+        Uses self.name to dynamically reference the service, making it portable across deployments.
 
-        Note: Railway automatically creates DATABASE_URL for PostgreSQL services.
+        Returns:
+            PostgreSQL connection string using Railway variable references.
+            Example: "postgresql://${{my-db.POSTGRES_USER}}:${{my-db.POSTGRES_PASSWORD}}@${{my-db.RAILWAY_PRIVATE_DOMAIN}}:5432/${{my-db.POSTGRES_DB}}"
+
+        Note: Railway does NOT auto-create DATABASE_URL. This method constructs it dynamically
+        from individual variables (POSTGRES_USER, POSTGRES_PASSWORD, RAILWAY_PRIVATE_DOMAIN, POSTGRES_DB).
         """
-        return f"${{{{{self.name}.DATABASE_URL}}}}"
+        user = f"${{{{{self.name}.POSTGRES_USER}}}}"
+        password = f"${{{{{self.name}.POSTGRES_PASSWORD}}}}"
+        host = f"${{{{{self.name}.RAILWAY_PRIVATE_DOMAIN}}}}"
+        port = "5432"
+        db = f"${{{{{self.name}.POSTGRES_DB}}}}"
+        return f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
     def get_connection_vars_reference(self) -> dict[str, str]:
         """Get Railway variable references for all PostgreSQL connection variables.
