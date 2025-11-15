@@ -54,7 +54,6 @@ class RailwayApp(InfraApp):
             # Add DATABASE_URL from referenced database service
             database_url_ref = self.database.get_connection_string_reference()
             container_env["DATABASE_URL"] = database_url_ref
-            logger.debug(f"Added DATABASE_URL reference from {self.database.name}")
 
         # Add user-provided env_vars (can override database vars if needed)
         if self.env_vars:
